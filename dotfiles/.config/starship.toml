@@ -1,0 +1,74 @@
+scan_timeout = 10
+format = """
+$directory\
+$username\
+$hostname\
+$git_branch\
+$git_commit\
+$docker_context\
+$time\
+\n\
+$character\
+"""
+
+[character]
+error_symbol = "[❯](bold red)"
+success_symbol = "[❯](bold green)"
+
+[directory]
+truncation_length = 100
+truncate_to_repo = false
+truncation_symbol = "…/"
+
+[aws]
+format = '[$symbol($profile )(\($region\) )]($style)'
+style = "bold blue"
+disabled = true
+
+[aws.region_aliases]
+ap-northeast-1 = "jp"
+
+[custom.arch]
+command = "uname -m"
+when = """ test $(uname -m) = "x86_64" """
+style = "bold yellow"
+format = "[$output]($style)"
+
+[docker_context]
+format = "via [$symbol $context](blue bold)"
+detect_files = [
+  'docker-compose.yml',
+  'docker-compose.yaml',
+  'Dockerfile',
+  'compose.yml',
+  'compose.yaml',
+]
+disabled = true
+
+
+[git_branch]
+format = '[$symbol$branch]($style) '
+
+[git_commit]
+format = '[\($hash$tag\)]($style) '
+
+[hostname]
+ssh_only = true
+ssh_symbol = ''
+format = '[@ $hostname]($style) '
+style = "cyan"
+
+
+[time]
+disabled = true
+format = '[\[$time\]]($style) '
+time_format = '%T'
+utc_time_offset = '+9'
+style = "blue"
+
+[username]
+style_user = "white bold"
+style_root = "black bold"
+format = "[$user]($style) "
+disabled = true
+show_always = true

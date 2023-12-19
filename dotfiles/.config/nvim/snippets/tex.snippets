@@ -1,0 +1,35 @@
+snippet template "Template"
+  \documentclass{jsarticle}
+  \usepackage[utf8]{inputenc}
+  \usepackage{url}
+  \usepackage[dvcpdfm]{graphicx}
+  \title{${1}}
+  \author{${2}}
+
+  \begin{document}
+  \maketitle
+  \section{}
+  ${0}
+  \end{document}
+
+snippet fig "Add figure"
+  \begin{figure}
+  	\centering
+  	\includegraphics[keepaspectratio, scale=1.0]{${1}}
+  	\caption{${2}}
+  	\label{fig:${3}}
+  \end{figure}
+  ${0}
+
+snippet itemize "Add itemize"
+  \begin{itemize}
+  	\item $1
+  \end{itemize}
+  $0
+
+
+snippet enumerate "Add enumerate"
+  \begin{enumerate}
+  	\item $1
+  \end{enumerate}
+  $0

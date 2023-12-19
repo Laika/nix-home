@@ -1,0 +1,10 @@
+from Crypto.Util.number import *
+from rich import pretty
+
+p, q = getPrime(512), getPrime(512)
+n = p * q
+e = 0x10001
+d = pow(e, -1, (p - 1) * (q - 1))
+
+
+pretty.install()

@@ -1,0 +1,339 @@
+snippet pwn
+  from pwn import *
+
+  conn_info = "${1}".split()
+  host, port = conn_info[1], int(conn_info[2])
+  _r = remote(ip, port)
+
+  ${0}
+
+
+snippet crypto "Crypto exploit template"
+  from Crypto.Util.number import *
+  from toyotama import *
+
+  ${0}
+
+
+snippet toyotama "Toyotama"
+  from toyotama import *
+  ${0}
+
+snippet connect "Connect"
+  from toyotama import *
+
+  _r = Connect("${1}")
+  ${0}
+
+snippet number "Pycryptodome"
+  from Crypto.Util.number import ${1}
+  ${0}
+
+snippet aes "Pycryptodome"
+  from Crypto.Cipher import AES
+  ${0}
+
+snippet padding "Pycryptodome"
+  from Crypto.Util.Padding import pad, unpad
+  ${0}
+
+snippet int "Input int"
+  int(input())
+
+snippet list "Input list"
+  list(map(int, input().split()))
+
+snippet map "map int"
+  map(int, input().split())
+
+snippet pgcd "Polynomial GCD"
+  def pgcd(a, b):
+  	while b:
+  		a, b = b, a % b
+  	return a.monic()
+  ${0}
+
+snippet rl "Receive separated value"
+  ${1:x} = _r.recvline().decode().split("${2::}")[-1].strip()
+  ${0}
+
+snippet sla "send line after"
+  _r.sendlineafter(${1:"> "}, ${2})
+  ${0}
+
+snippet dd "Dump a variable"
+  log.information(f"{${1:x} = }")
+  ${0}
+
+snippet hd "Dump a hex variable"
+  log.information(f"{${1:x} = :#x}")
+  ${0}
+
+snippet dsu "Disjoint Set Union"
+  class DSU:
+      def __init__(self, n):
+          self._n = n
+          self.parent_or_size = [-1 for _ in range(n)]
+
+      def leader(self, v):
+          assert 0 <= v < self._n
+          if self.parent_or_size[v] < 0:
+              return v
+          self.parent_or_size[v] = self.leader(self.parent_or_size[v])
+          return self.parent_or_size[v]
+
+      def merge(self, a, b):
+          assert 0 <= a < self._n
+          assert 0 <= b < self._n
+          x, y = map(self.leader, (a, b))
+          if x == y:
+              return x
+          if -self.parent_or_size[x] < -self.parent_or_size[y]:
+              x, y = y, x
+          self.parent_or_size[x] += self.parent_or_size[y]
+          self.parent_or_size[y] = x
+
+          return x
+
+      def same(self, a, b):
+          assert 0 <= a < self._n
+          assert 0 <= b < self._n
+          return self.leader(a) == self.leader(b)
+
+      def size(self, a):
+          assert 0 <= a < self._n
+          return -self.parent_or_size[self.leader(a)]
+
+      def groups(self):
+          result = [[i for i in range(self._n) if self.leader(i) == leader] for leader in range(self._n)]
+          result = filter(lambda g: g, result)
+          return result
+
+      def dump(self, indent=2):
+          buf = f"DSU ({n = })\n"
+          buf += "[\n"
+          for g in self.groups():
+              buf += f"{' '*indent}{g},\n"
+          buf += "]\n"
+
+          return buf
+
+
+snippet modint "Modint"
+  class Modint:
+      def __init__(self, x, mod):
+          self._x = x
+          self._mod = mod
+          self.table_initialized = False
+
+      @property
+      def x(self):
+          return self._x
+
+      @x.setter
+      def x(self, value):
+          self._x = value % self._mod
+
+      def __int__(self):
+          return int(self._x)
+
+      def __str__(self):
+          return str(self._x)
+
+      def __repr__(self):
+          # return f"Modint(x={self._x},mod={self._mod})"
+          return str(self)
+
+      def __call__(self, x):
+          return Modint(x % self._mod, self._mod)
+
+      def __add__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              value = (self._x + other._x) % self._mod
+          elif isinstance(other, int):
+              value = (self._x + other) % self._mod
+
+          return Modint(value, self._mod)
+
+      def __sub__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              value = (self._x - other._x) % self._mod
+          elif isinstance(other, int):
+              value = (self._x + other) % self._mod
+
+          return Modint(value, self._mod)
+
+      def __mul__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              value = (self._x * other._x) % self._mod
+          elif isinstance(other, int):
+              value = (self._x * other) % self._mod
+
+          return Modint(value, self._mod)
+
+      def __truediv__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              value = self._x * pow(other._x, -1, self._mod) % self._mod
+          elif isinstance(other, int):
+              value = self._x * pow(other, -1, self._mod) % self._mod
+
+          return Modint(value, self._mod)
+
+      __floordiv__ = __truediv__
+
+      def __pow__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              value = pow(self._x, other._x, self._mod)
+          elif isinstance(other, int):
+              value = pow(self._x, other, self._mod)
+
+          return Modint(value, self._mod)
+
+      __radd__ = __add__
+      __rsub__ = __sub__
+      __rmul__ = __mul__
+      __rfloordiv__ = __floordiv__
+      __rtruediv__ = __truediv__
+
+      def __iadd__(self, other):
+          self = self + other
+          return self
+
+      def __isub__(self, other):
+          self = self - other
+          return self
+
+      def __imul__(self, other):
+          self = self * other
+          return self
+
+      def __itruediv__(self, other):
+          self = self / other
+          return self
+
+      def __eq__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              return self._x == other._x
+          elif isinstance(other, int):
+              return self._x == (other % self._mod)
+
+      def __ne__(self, other):
+          return not self == other
+
+      def __lt__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              return self._x < other._x
+          elif isinstance(other, int):
+              return self._x < other._x % self._mod
+
+      def __gt__(self, other):
+          if isinstance(other, Modint):
+              assert self._mod == other._mod, "Different mod"
+              return self._x > other._x
+          elif isinstance(other, int):
+              return self._x > other._x % self._mod
+
+      def init_combination_table(self, ub):
+          self.fac = [0 for i in range(ub)]
+          self.finv = [0 for i in range(ub)]
+          self.inv = [0 for i in range(ub)]
+          self.fac[0] = self.fac[1] = 1
+          self.finv[0] = self.finv[1] = 1
+          self.inv[1] = 1
+          for i in range(2, ub):
+              self.fac[i] = self.fac[i - 1] * i % self._mod
+              self.inv[i] = self._mod - self.inv[self._mod % i] * (self._mod // i) % self._mod
+              self.finv[i] = self.finv[i - 1] * self.inv[i] % self._mod
+
+          self.table_initialized = True
+
+      def C(self, n, k):
+          assert self.table_initialized
+          if n < k:
+              return 0
+          if n < 0 or k < 0:
+              return 0
+          return Modint(self.fac[n] * (self.finv[k] * self.finv[n - k]), mod=self._mod)
+
+
+  class Mod998244353(Modint):
+      def __init__(self):
+          super().__init__(x=0, mod=998_244_353)
+
+
+  class Mod1000000007(Modint):
+      def __init__(self):
+          super().__init__(x=0, mod=1_000_000_007)
+
+
+snippet graph "Graph"
+  class Graph:
+      def __init__(self, n, G):
+          self.n = n
+          self.G = G
+
+      def __get_reversed_graph(self):
+          H = [[] for _ in range(self.n)]
+          for i, vs in enumerate(self.G):
+              for v in vs:
+                  H[v].append(i)
+
+          return H
+
+      def scc(self):
+          used = set()
+          groups = [[] for _ in range(self.n)]
+          order = []
+
+          def dfs(v):
+              used.add(v)
+              for vv in self.G[v]:
+                  if vv not in used:
+                      dfs(vv)
+              order.append(v)
+
+          H = self.__get_reversed_graph()
+
+          def rdfs(v, col):
+              groups[v] = col
+              used.add(v)
+              for vv in H[v]:
+                  if vv not in used:
+                      rdfs(vv, col)
+
+          for i in range(self.n):
+              if i not in used:
+                  dfs(i)
+
+          used = set()
+          label = 0
+          for v in reversed(order):
+              if v not in used:
+                  rdfs(v, label)
+                  label += 1
+          return label, groups
+
+
+snippet add "Add operation"
+  def add(self, data, stop=b"> ", number=1):
+    self.sendlineafter(stop, str(number))
+    self.sendlineafter(stop, data)
+
+
+snippet show "show operation"
+  def show(self, stop=b"> ", number=2):
+    self.sendlineafter(stop, str(number))
+
+snippet delete "delete operation"
+  def delete(self, stop=b"> ", number=3):
+    self.sendlineafter(stop, str(number))
+
+
+

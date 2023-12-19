@@ -1,0 +1,6 @@
+snippet apt "Ansible apt"
+  - name: Install ${1} via apt
+    apt:
+  	  name: $1
+  		update_cache: yes
+  ${0}

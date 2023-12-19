@@ -1,0 +1,484 @@
+snippet cptemp "Competitive Programming Template"
+  // clang-format off
+  #include <bits/stdc++.h>
+  #include <atcoder/all>
+
+  using namespace std;
+  using namespace atcoder;
+
+  #define REP_(i,a_,b_,a,b,...) for (int i = (a), lim##i = (b); i < lim##i; ++i)
+  #define REP(i,...) REP_(i, __VA_ARGS__, __VA_ARGS__, 0, __VA_ARGS__)
+
+  #define PER_(i,a_,b_,a,b,...) for (int i = (a), lim##i = (b); i > lim##i; --i)
+  #define PER(i,...) PER_(i, __VA_ARGS__, __VA_ARGS__, __VA_ARGS__, -1)
+
+  #define DEBUG(a) (cerr<<"[@L"<<__LINE__<<"] "<<(#a)<<": "<<(a)<<'\n');
+
+  #define ALL(x) std::begin(x),std::end(x)
+  #define RALL(x) std::rbegin(x),std::rend(x)
+
+  constexpr long long MOD = 1e9+7;
+  constexpr long long Mod = 998244353;
+
+  using ll = long long;
+  using mint = atcoder::static_modint<Mod>;
+
+  template<class T>bool chmax(T &a, const T &b){if(a<b){a=b;return true;}return false;}
+  template<class T>bool chmin(T &a, const T &b){if(b<a){a=b;return true;}return false;}
+  template<typename T>inline int bs(int g,int k,T c){while(abs(k-g)>1){int m=(g+k)/2;(c(m)?k:g)=m;}return k;}
+  template<typename T1,typename T2>ostream& operator<<(ostream& s,const pair<T1, T2>& p){return s <<"("<<p.first<<", "<<p.second<<")";}
+  ostream& operator<<(ostream& s,const mint x){s<<x.val();return s;}
+  template<typename T> ostream& operator<<(ostream& s,const vector<T>& v){s<<'[';for(size_t i=0;i<std::size(v);++i){s<<v[i];if(i<std::size(v)-1)s<<", ";}s<<']';return s;}
+  template<typename T> istream& operator>>(istream& s,vector<T>& v){for(T& x:v)s>>x;return s;}
+  // clang-format on
+  int main(){
+  	cin.tie(nullptr), ios::sync_with_stdio(false),
+  			cout<<fixed<<setprecision(16);
+  	${0}
+  	return 0;
+  }
+
+
+snippet rep "REP macro"
+  REP(${1:i}, ${2:n}){
+  	${3}
+  }
+  ${0}
+
+snippet per "PER macro"
+  PER(${1:i}, ${2:n}){
+  	${3}
+  }
+  ${0}
+
+snippet debug "Debug macro"
+  DEBUG(${1});
+  ${0}
+
+
+snippet all "All macro"
+  ALL(${1})${0}
+
+snippet all "Reversed all macro"
+  RALL(${1})${0}
+
+snippet point "Point class"
+  class Point {
+  public:
+    int i, j;
+    Point() {
+      i = 0;
+      j = 0;
+    }
+    Point(int _i, int _j) {
+      i = _i;
+      j = _j;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Point &p) {
+      os << "(" << p.i << ", " << p.j << ")";
+      return os;
+    }
+    inline int &Cost() { return cost[i][j]; }
+    vector<Point> adjacent(vector<int> di = {1, 0, -1, 0},
+                           vector<int> dj = {0, 1, 0, -1}) {
+      assert(size(di) == size(dj));
+      int n = size(di);
+      vector<Point> adj(n);
+      for (int k = 0; k < n; ++k) {
+        adj.emplace_back(this->i + di[k], this->j + dj[k]);
+      }
+      return adj;
+    }
+  };
+
+snippet grid "Grid class"
+  class Grid {
+  public:
+    int h;
+    int w;
+    Point start;
+    Point goal;
+    vector<string> G;
+    char wall;
+    char path;
+    Grid() {
+      h = 0;
+      w = 0;
+    }
+    Grid(int _h, int _w, char _wall = '#', char _path = '.') {
+      h = _h;
+      w = _w;
+      wall = _wall;
+      path = _path;
+      G.resize(h);
+    }
+    friend std::istream &operator>>(std::istream &is, Grid &g) {
+      for (auto &x : g.G) {
+        is >> x;
+      }
+      return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Grid &g) {
+      os << "Grid (h: " << g.h << ", w: " << g.w << ")" << '\n';
+      for (auto x : g.G) {
+        os << x << '\n';
+      }
+      return os;
+    }
+    inline bool is_oob(Point p) { return p.i < 0 or h <= p.i or p.j < 0 or w <= p.j; }
+    inline bool is_wall(Point p) { return this->G[p.i][p.j] == wall; }
+  };
+
+snippet coordinate_comporession "Coordinate compresion"
+  template <typename T> vector<T> coordinate_compression(vector<T> A) {
+    vector<T> B = A;
+    sort(begin(B), end(B));
+    B.erase(unique(begin(B), end(B)), end(B));
+
+    int n = size(A);
+    vector<T> C(n);
+    for (int i = 0; i < n; ++i) {
+      C[i] = lower_bound(begin(B), end(B), A[i]) - B.begin();
+    }
+    return C;
+  }
+
+snippet is_prime "Primality Tester"
+  bool is_prime(ll n){
+  	if(n == 2)  return true;
+  	if(n == 1 or !(n & 1)) return false;
+
+  	random_device rnd;
+  	ll d = (n-1) >> 1;
+  	while(!(d&1))
+  		d >>= 1;
+
+  	for(int k = 0; k < 100; ++k){
+  			ll a = rnd() % (n-1) + 1;
+  			ll t = d;
+  			ll y = powmod(a, t, n);
+  			while(t != (n-1) and y != 1 and y != (n-1)){
+  				y = powmod(y,2,n);
+  				t <<= 1;
+  			}
+  			if(y != n-1 and !(t & 1)){
+  				return false;
+  			}
+  	}
+  	return true;
+  }
+
+
+snippet in "scanf"
+  ${1:int} ${2:n};
+  scanf("%${3:d}", &$2);${4}
+
+snippet inn
+  ${1:int} ${2:n}, ${3:m};
+  scanf("%${4:d}%$4", &$2, &$3);${5}
+
+snippet innn
+  ${1:int} ${2:a}, ${3:b}, ${4:c};
+  scanf("%${5:d}%$5%$5", &$2, &$3, &$4);${6}
+
+
+snippet     innnn
+  ${1:int} ${2:a}, ${3:b}, ${4:c}, ${5:d};
+  scanf("%${6:d}%$6%$6%$6", &$2, &$3, &$4, &$5);${7}
+
+snippet     v
+  vector<${1:ll}> ${2:a}(${3:n});
+  rep(i, $3) cin >> $2[i];
+  ${5}
+
+snippet     for
+  for(${1:int} ${2:i} = ${3:0}; ${4:i<n}; ${5:++i}){
+  		${6}
+  }
+  ${7}
+
+snippet split "Split"
+  vector<string> split(const string &str, char sep){
+  		vector<string> v;
+  		stringstream ss(str);
+  		string buffer;
+  		while( getline(ss, buffer, sep) ) {
+  				v.push_back(buffer);
+  		}
+  		return v;
+  }
+
+snippet bit "BIT"
+  template<typename T>
+  class BIT{
+  public:
+  		vector<T> data;
+  		int sz;
+  		BIT(int sz):
+  				data(vector<int>(++sz, 0)), sz(sz) {}
+
+  		T sum(int i){
+  				T s = 0;
+  				for(++i; i > 0; i -= i & -i) s += data[i];
+  				return s;
+  		}
+
+  		void add(int i, T x){
+  				for(++i; i < sz; i += i & -i) data[i] += x;
+  		}
+  };
+
+
+snippet segmenttree "Segment Tree"
+  template <class T>
+  class SegmentTree{
+  private:
+  		int n;
+  		vector<T> data;
+  		T def;
+  		function<T(T,T)> operation;
+  		function<T(T,T)> update;
+
+  		T _query(int a, int b, int k, int l, int r){
+  				if(r <= a or b <= l) return def;
+
+  				if(a <= l and r <= b) return data[k];
+  				else{
+  						T c1 = _query(a, b, 2*k+1, l, (l+r)/2);
+  						T c2 = _query(a, b, 2*k+2, (l+r)/2, r);
+  						return operation(c1, c2);
+  				}
+  		}
+
+  public:
+  		SegmentTree(size_t n_, T _def, function<T(T,T)> _operation, function<T(T,T)> _update)
+  		: def(_def), operation(_operation), update(_update){
+  				n = 1; while(n < n_) n *= 2;
+  				data = vector<T>(2*n-1, def);
+  		}
+
+  	void change(int i, int val){
+  			i += n-1;
+  			data[i] = update(data[i], val);
+  			while(i > 0){
+  					i = (i-1)/2;
+  					data[i] = operation(data[2*i+1], data[2*i+2]);
+  			}
+  	}
+
+  	T query(int a, int b){
+  			return _query(a, b, 0, 0, n);
+  	}
+
+  	T operator[](int i){
+  			return data[i+n-1];
+  	}
+
+  };
+
+snippet nchar "N characters"
+  inline string nchar(char c, int n){
+  		string s = "";
+  		rep(i, n) s += c;
+  		return s;
+  }
+
+
+snippet eratos "Eratosthenes"
+  vector<ll> prime;
+  void eratos(const int max){
+  		bitset<1000001> isprime; isprime.set();
+  		isprime.reset(0); isprime.reset(1);
+  		for(int i = 2; i*i <= max; ++i)
+  				if(isprime.test(i))
+  						for(int j = 2; i*j <= max; ++j)
+  								isprime.reset(i*j);
+  		for(int i = 0; i <= max; ++i)
+  				if(isprime.test(i)) prime.emplace_back(i);
+  }
+
+snippet nextcombination "Next Combination"
+  template<typename T>
+  T next_combination(T sub) {
+  		T x = sub & -sub, y = sub + x;
+  		return (((sub & ~y) / x) >> 1) | y;
+  }
+
+snippet comb "Combination Table"
+  ll com[${1:60}+1][$1+1];
+  void buildcomb(){
+  		for(int i = 0; i <= $1; ++i){
+  				for(int j = 0; j <= i; ++j){
+  						if(j == 0 or i == j){
+  								com[i][j] = 1LL;
+  							}
+  						else{
+  								com[i][j] = com[i-1][j-1] + com[i-1][j];
+  						}
+  				}
+  		}
+  }
+
+snippet combmod "Combination table (MOD)"
+  template<class T> struct BiCoef {
+  		vector<T> fact_, inv_, finv_;
+  		constexpr BiCoef() {}
+  		constexpr BiCoef(int n) noexcept : fact_(n, 1), inv_(n, 1), finv_(n, 1) {
+  				init(n);
+  		}
+  		constexpr void init(int n) noexcept {
+  				fact_.assign(n, 1), inv_.assign(n, 1), finv_.assign(n, 1);
+  				int MOD_ = fact_[0].getmod();
+  				for(int i = 2; i < n; i++){
+  						fact_[i] = fact_[i-1] * i;
+  						inv_[i] = -inv_[MOD_%i] * (MOD_/i);
+  						finv_[i] = finv_[i-1] * inv_[i];
+  				}
+  		}
+  		constexpr T com(int n, int k) const noexcept {
+  				if (n < k || n < 0 || k < 0) return 0;
+  				return fact_[n] * finv_[k] * finv_[n-k];
+  		}
+  		constexpr T fact(int n) const noexcept {
+  				if (n < 0) return 0;
+  				return fact_[n];
+  		}
+  		constexpr T inv(int n) const noexcept {
+  				if (n < 0) return 0;
+  				return inv_[n];
+  		}
+  		constexpr T finv(int n) const noexcept {
+  				if (n < 0) return 0;
+  				return finv_[n];
+  		}
+  };
+
+  BiCoef<mint> bc;
+  ${0}
+
+snippet factor "Factorize"
+  template<typename T>
+  map<T, T> factorization(T n){
+
+  		map<T, T> factor;
+  		while (n % 2 == 0){
+  				++factor[2];
+  				n /= 2;
+  		}
+  		for (T i = 3; i*i <= n; i += 2){
+  				while (n%i == 0){
+  						++factor[i];
+  						n /= i;
+  				}
+  		}
+  		if (n > 2)
+  				++factor[n];
+
+  		return factor;
+  }
+
+snippet divisor "Divisor"
+  vector<ll> divisor(ll n) {
+  		vector<ll> res;
+  		for (ll i = 1; i*i <= n; ++i) {
+  				if (n % i == 0) {
+  						res.emplace_back(i);
+  						ll j = n / i;
+  						if (j != i) res.emplace_back(j);
+  				}
+  		}
+  		sort(res.begin(), res.end());
+  		return res;
+  }
+
+snippet dijkstra "Dijkstra"
+  struct Edge {
+  	int to;
+  	ll cost;
+  	// Add more states here
+  };
+
+  template<typename T>
+  vector<T> dijkstra(int s, vector<vector<Edge>> G){
+  		// Declare
+  		int n = G.size();
+  		T lim = numeric_limits<T>::max()/2;
+  		vector<T> dist(n, lim);
+  		priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> pq;
+
+  		// Initialize
+  		dist[s] = 0;
+  		pq.emplace(0, s);
+
+  		while(!q.empty()) {
+  				auto [d, v] = pq.top(); pq.pop();
+  				if(dist[v] != d) continue;
+  				for(auto [vv, cost] : G[v]) {
+  						if(dist[vv] > dist[v]+cost) {
+  								dist[vv] = dist[v]+cost;
+  								pq.emplace(dist[vv], vv);
+  						}
+  				}
+  		}
+  		return dis;
+  }
+
+
+snippet warshall "Warshall-Floyd"
+  template<typename T>
+  bool warshall_floyd(vector<vector<T> >& dis){
+  		// Return true if `dis` contains a negative cycle.
+  		int V = dis.size();
+  		for(int i = 0; i < V; ++i) dis[i][i] = 0;
+  		const T lim = numeric_limits<T>::max();
+  		for(int k = 0; k < V; ++k)
+  				for(int i = 0; i < V; ++i)
+  						for(int j = 0; j < V; ++j)
+  								if(dis[i][k] != lim and dis[k][j] != lim)
+  										dis[i][j] = min(dis[i][j], dis[i][k]+dis[k][j]);
+
+  		for(int i = 0; i < V; ++i)
+  				if(dis[i][i] < 0) return true;
+  		return false;
+  }
+
+snippet bellman "Bellman-Ford"
+  template<typename T>
+  pair<vector<T>, bool> bellman_ford(int s, vector<vector<pair<T, int>>> G){
+  		int V = G.size();
+  		T lim = numeric_limits<T>::max()/2;
+  		vector<T> dis(V, lim);
+  		dis[s] = 0;
+  		for(int i = 0; i < V; ++i){
+  				for(int j = 0; j < V; ++j){
+  						for(pair<T, int> e : G[j]){
+  								T cost; int to;
+  								tie(cost, to) = e;
+  								if(dis[j] != lim and dis[to] > dis[j]+cost){
+  										dis[to] = dis[j]+cost;
+  										if(i == V-1) return {dis, true};
+  								}
+  						}
+  				}
+  		}
+  		return {dis, false};
+  }
+
+snippet grid "Grid Template"
+  vector<vector<int>> step(h, vector<int>(w, -1));
+  queue<pair<int, int>> q;
+  q.emplace(stx, sty);
+  step[sty][stx] = 0;
+  while(!q.empty()){
+  		pair<int, int> xy = q.front(); q.pop();
+  		int x = xy.first, y = xy.second;
+  		rep(i, 4){
+  				int X = x+dx[i], Y = y+dy[i];
+  				if(X < 0 or X >= w or Y < 0 or Y >= h) continue;
+  				if(step[Y][X] >= 0) continue;
+  				if(s[Y][X] == '#') continue;
+  				step[Y][X] = step[y][x] + 1;
+  				q.emplace(X, Y);
+  		}
+  }
+
